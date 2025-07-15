@@ -20,7 +20,7 @@ app.post('/send-email', async (req, res) => {
   const { name, email, message } = req.body;
 
   try {
-    const sentFrom = new Sender('mailer@test-p7kx4xwdjwvg9yjr.mlsender.net', 'DeJongh');
+    const sentFrom = new Sender('mailer@djdrones.com.br', 'DeJongh Contato');
     const recipients = [new Recipient('contato@djdrones.com.br', 'Cliente')]; // ou use o próprio email do usuário
 
     const emailParams = new EmailParams()
