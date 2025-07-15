@@ -21,7 +21,7 @@ app.post("/send-email", async (req, res) => {
   try {
     const data = await resend.emails.send({
       from: "DeJongh <onboarding@resend.dev>",
-      to: ["marcus.relation@gmail.com"],
+      to: ["contato@djdrones.com.br"],
       subject: `DeJongh Website - Novo contato de ${name}`,
       html: `
                 <p><strong>Nome:</strong> ${name}</p>
