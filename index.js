@@ -1,43 +1,46 @@
-const express = require("express");
-const cors = require("cors");
-const bodyParser = require("body-parser");
-const { Resend } = require("resend");
-require("dotenv").config();
+import express from 'express';
+import cors from 'cors';
+import 'dotenv/config';
+import { MailerSend, EmailParams, Sender, Recipient } from 'mailersend';
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 // Middlewares
-app.use(cors({
-  origin: "*",
-}));
-app.use(bodyParser.json());
+app.use(cors());
+app.use(express.json());
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Configurar MailerSend
+const mailerSend = new MailerSend({
+  apiKey: process.env.API_KEY, // no .env
+});
 
-app.post("/send-email", async (req, res) => {
+// Rota da API
+app.post('/send-email', async (req, res) => {
   const { name, email, message } = req.body;
 
   try {
-    const data = await resend.emails.send({
-      from: "DeJongh <onboarding@resend.dev>",
-      to: ["contato@djdrones.com.br"],
-      subject: `DeJongh Website - Novo contato de ${name}`,
-      html: `
-                <p><strong>Nome:</strong> ${name}</p>
-                <p><strong>Email:</strong> ${email}</p>
-                <p><strong>Mensagem:</strong><br/>${message}</p>
-            `,
-    });
+    const sentFrom = new Sender('mailer@test-p7kx4xwdjwvg9yjr.mlsender.net', 'DeJongh');
+    const recipients = [new Recipient('contato@djdrones.com.br', 'Cliente')]; // ou use o próprio email do usuário
 
-    console.log("Email enviado:", data);
-    res.status(200).json({ success: true });
+    const emailParams = new EmailParams()
+      .setFrom(sentFrom)
+      .setTo(recipients)
+      .setReplyTo(new Sender(email, name)) // quem enviou o formulário
+      .setSubject(`DeJongh Website - Novo Contato`)
+      .setHtml(`<p><strong>Nome:</strong> ${name}</p><p><strong>Email:</strong> ${email}</p><p><strong>Mensagem:</strong> ${message}</p>`)
+      .setText(`Nome: ${name}\nEmail: ${email}\nMensagem: ${message}`);
+
+    const response = await mailerSend.email.send(emailParams);
+
+    return res.status(200).json({ message: 'Email enviado com sucesso', response });
   } catch (error) {
-    console.error("Erro ao enviar o e-mail:", error);
-    res.status(500).json({ success: false, error: error.message });
+    console.error('Erro ao enviar email:', error);
+    return res.status(500).json({ error: 'Erro ao enviar email' });
   }
 });
 
+// Inicializa o servidor
 app.listen(port, () => {
   console.log(`Servidor rodando em http://localhost:${port}`);
 });
