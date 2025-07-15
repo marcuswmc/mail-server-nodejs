@@ -8,7 +8,9 @@ const app = express();
 const port = 3000;
 
 // Middlewares
-app.use(cors());
+app.use(cors({
+  origin: "*",
+}));
 app.use(bodyParser.json());
 
 const resend = new Resend(process.env.RESEND_API_KEY);
